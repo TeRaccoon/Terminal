@@ -12,7 +12,7 @@ namespace Terminal
         ConsoleHandler consoleHandler = new ConsoleHandler();
         public Run()
         {
-            InputHandler inputHandler = new InputHandler(fileHandler);
+            InputHandler inputHandler = new InputHandler(fileHandler, consoleHandler);
             string output = string.Empty;
             while (output != "exit")
             {

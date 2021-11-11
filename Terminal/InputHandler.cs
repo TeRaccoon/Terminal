@@ -9,9 +9,11 @@ namespace Terminal
     class InputHandler
     {
         private FileHandler fileHandler;
-        public InputHandler(FileHandler fileHandler)
+        private ConsoleHandler consoleHandler;
+        public InputHandler(FileHandler fileHandler, ConsoleHandler consoleHandler)
         {
             this.fileHandler = fileHandler;
+            this.consoleHandler = consoleHandler;
         }
         public List<string> SplitInput(string input)
         {
@@ -88,26 +90,26 @@ namespace Terminal
 
         private string Out(List<string> flags)
         {
-            string output = string.Empty;
             string length = "noLength";
-            string regex = "noRegext";
+            string regex = "noRegex";
             for (int i = 1; i < flags.Count; i++)
             {
-                if (flags[i] == "l")
+                if (flags[i][0] == 'l')
                 {
                     length = flags[i];
                 }
-                else if (flags[i] == "R")
+                else if (flags[i][0] == 'R')
                 {
                     regex = "R" + flags[i];
                 }
-                else if (flags[i] == "r")
+                else if (flags[i][0] == 'r')
                 {
                     regex = "r" + flags[i];
                 }
             }
-            output = fileHandler.GetFileContents(flags[0], length, regex);
-            return output;
+            string[] output = fileHandler.GetFileContents(flags[0], length, regex);
+            consoleHandler.HighlightWord(output[1]);
+            return output[0];
         }
     }
 }

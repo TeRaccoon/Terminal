@@ -49,7 +49,7 @@ namespace Terminal
             return filesDirectories;
         }
 
-        public string GetFileContents(string fileDirectory, string lengthString, string regexString)
+        public string[] GetFileContents(string fileDirectory, string lengthString, string regexString)
         {
             int length = 0;
             if (lengthString != "noLength")
@@ -62,15 +62,16 @@ namespace Terminal
                 }
                 catch
                 {
-                    return "Invalid length specified!";
+                    return new string[] { "Invalid length specified!", null };
                 }
             }
+            char regexChar = 'x';
             if (regexString != "noRegex")
             {
-                regexString = regexString.Substring(1);
+                regexChar = regexString[0];
+                regexString = regexString.Substring(2);
                 regexString = regexString.Trim();
             }
-
             fileDirectory = fileDirectory.Trim();
             if (!fileDirectory.Contains(@"\"))
             {
@@ -87,11 +88,11 @@ namespace Terminal
             {
                 if (length != 0)
                 {
-                    return dataHandler.RegexString(File.ReadAllLines(fileDirectory).Take(length).ToArray(), regexString);
+                    return new string[] { dataHandler.RegexString(File.ReadAllLines(fileDirectory).Take(length).ToArray(), regexString, regexChar) };
                 }
-                return dataHandler.RegexString(File.ReadAllLines(fileDirectory), regexString);
+                return new string[] { dataHandler.RegexString(File.ReadAllLines(fileDirectory), regexString, regexChar), regexString };
             }
-            return "The file " + fileDirectory + " does not exist!";
+            return new string[] { "The file " + fileDirectory + " does not exist!", null };
         }
     }
 }
