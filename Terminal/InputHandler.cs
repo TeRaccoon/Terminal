@@ -95,7 +95,7 @@ namespace Terminal
             {
                 if (flags[i] == "l")
                 {
-                    output = fileHandler.GetFileContents(flags[0], flags[i]);
+                    length = flags[i];
                 }
                 else if (flags[i] == "R")
                 {
