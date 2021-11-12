@@ -13,10 +13,14 @@ namespace Terminal
         DataHandler dataHandler = new DataHandler();
         public FileHandler()
         {
-            directory = Environment.CurrentDirectory;
+            directory = Environment.CurrentDirectory + @"\";
         }
-        public string ChangeCurrentDirectory(string newDirectory) // PLEASE CHANGE VARIABLE NAME MY HEAD HURTS
+        public string FixDirectory(string newDirectory)
         {
+            if (!newDirectory.Contains(@"\"))
+            {
+                newDirectory = directory + newDirectory;
+            }
             if (newDirectory[0] == '.' && newDirectory[1] == Convert.ToChar(@"\"))
             {
                 newDirectory = directory + newDirectory.Substring(2);
@@ -25,9 +29,14 @@ namespace Terminal
             {
                 newDirectory += @"\";
             }
+            return newDirectory;
+        }
+        public string ChangeCurrentDirectory(string newDirectory)
+        {
+            newDirectory = FixDirectory(newDirectory);
             if (!Directory.Exists(newDirectory))
             {
-                return "Error! Directory " + directory + " does not exist!";
+                return "Error! Directory " + newDirectory + " does not exist!";
             }
             directory = newDirectory;
             return null;
@@ -88,11 +97,42 @@ namespace Terminal
             {
                 if (length != 0)
                 {
-                    return new string[] { dataHandler.RegexString(File.ReadAllLines(fileDirectory).Take(length).ToArray(), regexString, regexChar) };
+                    return new string[] { dataHandler.RegexString(File.ReadAllLines(fileDirectory).Take(length).ToArray(), regexString, regexChar), regexString };
                 }
                 return new string[] { dataHandler.RegexString(File.ReadAllLines(fileDirectory), regexString, regexChar), regexString };
             }
             return new string[] { "The file " + fileDirectory + " does not exist!", null };
+        }
+
+        public string BackDirectory()
+        {
+            if (directory.LastIndexOf(Convert.ToChar(@"\")) != -1)
+            {
+                ChangeCurrentDirectory(directory.Substring(0, directory.Substring(0, directory.Length -1).LastIndexOf(Convert.ToChar(@"\"))));
+                return null;
+            }
+            else
+            {
+                return "Cannot reverse directory further!";
+            }
+        }
+        public string ValidateFilePath(string filePath)
+        {
+            filePath = FixDirectory(filePath);
+            filePath = filePath.Substring(0, filePath.Length - 1);
+            if (File.Exists(filePath))
+            {
+                //try
+                //{
+                //    File.OpenRead(directory);
+                //}
+                //catch
+                //{
+                //    return false;
+                //}
+                return filePath;
+            }
+            return null;
         }
     }
 }

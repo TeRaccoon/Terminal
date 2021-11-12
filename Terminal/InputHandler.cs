@@ -10,6 +10,7 @@ namespace Terminal
     {
         private FileHandler fileHandler;
         private ConsoleHandler consoleHandler;
+        private SecurityHandler securityHandler = new SecurityHandler();
         public InputHandler(FileHandler fileHandler, ConsoleHandler consoleHandler)
         {
             this.fileHandler = fileHandler;
@@ -40,6 +41,18 @@ namespace Terminal
                     output = Out(flags);
                     break;
 
+                case "back":
+                    output = fileHandler.BackDirectory();
+                    break;
+
+                case "md5":
+                    output = securityHandler.MD5Hash(fileHandler, flags[0]);
+                    break;
+
+                case "sha512":
+                    output = securityHandler.MD5Hash(fileHandler, flags[0]);
+                    break;
+
                 case "clear":
                     Console.Clear();
                     output = null;
@@ -62,7 +75,7 @@ namespace Terminal
             List<string> filesDirectories = fileHandler.GetFilesAndDirectories();
             foreach (string flag in flags)
             {
-                switch (flag)
+                switch (flag.Trim())
                 {
                     case "S":
                         for (int i = 0; i < filesDirectories.Count; i++)

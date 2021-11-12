@@ -12,7 +12,7 @@ namespace Terminal
         public void Output(string output, ConsoleColor fColour)
         {
             Console.ForegroundColor = fColour;
-            if (output.Contains(wordToHighlight) && wordToHighlight != string.Empty && wordToHighlight != null)
+            if (wordToHighlight != string.Empty && wordToHighlight != null && output.Contains(wordToHighlight))
             {
                 string[] splitOutput = output.Split(new string[] { wordToHighlight }, StringSplitOptions.None);
                 for (int i = 0; i < splitOutput.Length - 1; i++)
