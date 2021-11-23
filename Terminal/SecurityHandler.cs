@@ -24,13 +24,12 @@ namespace Terminal
                 return "Invalid file directory!";
             }
         }
-        public string SHA512Hash(FileHandler fileHandler, string directory)
+        public string SHA512Hash(FileHandler fileHandler, string inputDirectory)
         {
-            directory = directory.Trim();
-            directory = fileHandler.ValidateFilePath(directory);
-            if (directory != null)
+            inputDirectory = fileHandler.ValidateFilePath(inputDirectory);
+            if (inputDirectory != null)
             {
-                byte[] data = SHA512.Create().ComputeHash(File.OpenRead(directory));
+                byte[] data = SHA512.Create().ComputeHash(File.OpenRead(inputDirectory));
                 return BitConverter.ToString(data).Replace("-", string.Empty).ToLowerInvariant();
             }
             else

@@ -19,7 +19,14 @@ namespace Terminal
             {
                 if ((data[i].ToLower().Contains(regex.ToLower()) && regexType == 'R') || (data[i].Contains(regex) && regexType == 'r'))
                 {
-                    output += data[i] + "\n";
+                    if (data[i].Substring(data[i].Length - 3, 2) != "\n")
+                    {
+                        output += data[i];
+                    }
+                    else
+                    {
+                        output += data[i] + "\n";
+                    }
                 }
             }
             if (output == string.Empty)
@@ -30,6 +37,15 @@ namespace Terminal
             {
                 return output;
             }
+        }
+
+        public string[] AddNewLine(string[] data)
+        {
+            for (int i = 0; i < data.Length; i++)
+            {
+                data[i] += "\n";
+            }
+            return data;
         }
     }
 }
