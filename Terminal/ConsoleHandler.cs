@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Text.RegularExpressions;
 
 namespace Terminal
@@ -45,6 +41,35 @@ namespace Terminal
         {
             this.wordToHighlight = wordToHighlight;
             this.regexType = regexType;
+        }
+
+        public void OutputAsBar(int data)
+        {
+            int originalData = data;
+            data = Convert.ToInt32(data / 25);
+            switch (data)
+            {
+                case 3:
+                    Console.BackgroundColor = ConsoleColor.Red;
+                    break;
+
+                case 2:
+                    Console.BackgroundColor = ConsoleColor.DarkYellow;
+                    break;
+
+                case 1:
+                    Console.BackgroundColor = ConsoleColor.Green;
+                    break;
+
+                case 0:
+                    Console.BackgroundColor = ConsoleColor.DarkGreen;
+                    break;
+            }
+            for (int i = -1; i < Convert.ToInt32(originalData / 4); i++)
+            {
+                Console.Write(" ");
+            }
+            Console.ResetColor();
         }
     }
 }

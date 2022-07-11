@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Security.Cryptography;
 using System.IO;
+using System.Security.Cryptography;
 
 namespace Terminal
 {
@@ -30,6 +26,19 @@ namespace Terminal
             if (inputDirectory != null)
             {
                 byte[] data = SHA512.Create().ComputeHash(File.OpenRead(inputDirectory));
+                return BitConverter.ToString(data).Replace("-", string.Empty).ToLowerInvariant();
+            }
+            else
+            {
+                return "Invalid file directory!";
+            }
+        }
+        public string SHA256Hash(FileHandler fileHandler, string inputDirectory)
+        {
+            inputDirectory = fileHandler.ValidateFilePath(inputDirectory);
+            if (inputDirectory != null)
+            {
+                byte[] data = SHA256.Create().ComputeHash(File.OpenRead(inputDirectory));
                 return BitConverter.ToString(data).Replace("-", string.Empty).ToLowerInvariant();
             }
             else

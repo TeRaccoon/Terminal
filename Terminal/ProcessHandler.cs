@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Diagnostics;
 
 namespace Terminal
@@ -54,8 +51,15 @@ namespace Terminal
             {
                 if (process.ProcessName == processName)
                 {
-                    process.Kill();
-                    killed = true;
+                    try
+                    {
+                        process.Kill();
+                        killed = true;
+                    }
+                    catch (Exception)
+                    {
+                        return "Failed to kill process with name " + processName + " due to invalid access! Specifically process " + process.Id + ".";
+                    }
                 }
             }
             if (killed)

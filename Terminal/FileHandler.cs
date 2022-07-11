@@ -1,14 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.IO;
-using System.Security.Permissions;
-using System.Security.AccessControl;
-using System.Security;
-using System.Security.Principal;
 using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Security.AccessControl;
+using System.Security.Principal;
 
 namespace Terminal
 {
@@ -27,11 +23,18 @@ namespace Terminal
             newDirectory = newDirectory.Replace('/', Convert.ToChar(@"\"));
             if (newDirectory == string.Empty)
             {
-                return "null";
+                return newDirectory;
             }
-            if (!newDirectory.Contains(@"\") && newDirectory[1] != ':')
+            try
             {
-                newDirectory = directory + newDirectory;
+                if (!newDirectory.Contains(@"\") && newDirectory[1] != ':')
+                {
+                    newDirectory = directory + newDirectory;
+                }
+            }
+            catch (IndexOutOfRangeException)
+            {
+                return newDirectory;
             }
             if (newDirectory[0] == '.' && newDirectory[1] == Convert.ToChar(@"\"))
             {
@@ -53,7 +56,7 @@ namespace Terminal
             directory = newDirectory;
             return null;
         }
-        
+
         public string GetCurrentDirectory()
         {
             return directory;
@@ -153,21 +156,25 @@ namespace Terminal
             if (file != null)
             {
                 string output = "\n";
-                output += "File: " + file + "\nAttributes:" + File.GetAttributes(file) + "Extension: " + Path.GetExtension(file) + "\nAccess Controls: ";
+                output += "File: " + file + "\nAttributes: " + File.GetAttributes(file) + "\nExtension: " + Path.GetExtension(file);
+                output += "\n-----------------------------------------------------------------------------\n";
+                output += String.Format("| {0,-28} {1,0} {2,28} |", "", "Access Controls", "");
                 if (!File.GetAttributes(file).HasFlag(FileAttributes.System))
                 {
+                    output += "\n-----------------------------------------------------------------------------\n";
                     FileSecurity accessControlList = File.GetAccessControl(file);
                     AuthorizationRuleCollection arc = accessControlList.GetAccessRules(true, true, typeof(SecurityIdentifier));
                     foreach (FileSystemAccessRule fsar in arc)
                     {
-                        output += fsar.IdentityReference.Translate(typeof(NTAccount)) + ": " + fsar.FileSystemRights + "\n";
+                        output += String.Format("| {0,-35} | {1,35} |", fsar.IdentityReference.Translate(typeof(NTAccount)), fsar.FileSystemRights);
+                        output += "\n-----------------------------------------------------------------------------\n";
                     }
                 }
                 else
                 {
                     output += "Unretrieveable\n";
                 }
-                output += "Access times:\n - Last access: " + File.GetLastAccessTime(file) + "\n - Last write time: " + File.GetLastWriteTime(file) + "\n - Creation time: " + File.GetCreationTime(file) + "\n";
+                output += "\nAccess times:\n - Last access: " + File.GetLastAccessTime(file) + "\n - Last write time: " + File.GetLastWriteTime(file) + "\n - Creation time: " + File.GetCreationTime(file) + "\n";
                 return output;
             }
             return "Invalid file path!";
@@ -181,7 +188,7 @@ namespace Terminal
                 string[] files = Directory.GetFiles(directoryPath);
                 foreach (string file in files)
                 {
-                    output += AssessFile(file);
+                    output += AssessFile(file) + "\n";
                 }
                 return output;
             }
@@ -191,15 +198,56 @@ namespace Terminal
         public string MakeFile(string filePath)
         {
             filePath = FixDirectory(filePath);
-            filePath = filePath.Substring(0, filePath.Length - 1);
-            FileStream createdFile = File.Create(filePath);
-            createdFile.Close();
-            return "File create successfully!";
+            try
+            {
+                filePath = filePath.Substring(0, filePath.Length - 1);
+                FileStream createdFile = File.Create(filePath);
+                createdFile.Close();
+                return "File create successfully!";
+            }
+            catch
+            {
+                return "Failed to create file!";
+            }
         }
 
+        public string MakeDirectory(string directoryPath)
+        {
+            directoryPath = FixDirectory(directoryPath);
+            directoryPath = directoryPath.Substring(0, directoryPath.Length - 1);
+            string newDirectoryLocation = directoryPath.Substring(0, directoryPath.LastIndexOf(Convert.ToChar(@"\")));
+            if (Directory.GetDirectories(newDirectoryLocation).Contains(directoryPath))
+            {
+                return "A directory with that name already exists!";
+            }
+            try
+            {
+                Directory.CreateDirectory(directoryPath);
+                return "Directory create successfully!";
+            }
+            catch
+            {
+                return "Failed to create directory!";
+            }
+        }
+
+        public string DeleteDirectory(string directoryPath)
+        {
+            directoryPath = ValidatedirectoryPath(directoryPath);
+            if (directoryPath == null)
+            {
+                return "The specified directory does not exist!";
+            }
+            Directory.Delete(directoryPath);
+            return "Directory deleted successfully!";
+        }
         public string DeleteFile(string filePath)
         {
             filePath = ValidateFilePath(filePath);
+            if (filePath == null)
+            {
+                return "The specified file does not exist!";
+            }
             File.Delete(filePath);
             return "File deleted successfully!";
         }
@@ -215,6 +263,40 @@ namespace Terminal
             catch
             {
                 return "Failed to open file " + filePath + "!";
+            }
+        }
+
+        public string CopyFile(string fileToCopy, string locationOfNewFile)
+        {
+            fileToCopy = ValidateFilePath(fileToCopy);
+            locationOfNewFile = FixDirectory(locationOfNewFile);
+            locationOfNewFile = locationOfNewFile.Substring(0, locationOfNewFile.Length - 1);
+            try
+            {
+                File.Copy(fileToCopy, locationOfNewFile);
+                return "File copied successfully!";
+            }
+            catch
+            {
+                return "Failed to copy " + fileToCopy + " to " + locationOfNewFile + "!";
+            }
+        }
+        public string MoveFile(string fileToMove, string locationOfNewFile)
+        {
+            fileToMove = ValidateFilePath(fileToMove);
+            locationOfNewFile = FixDirectory(locationOfNewFile);
+            try
+            {
+                if (locationOfNewFile[locationOfNewFile.Length - 1] == Convert.ToChar(@"\"))
+                {
+                    locationOfNewFile += fileToMove.Replace(GetCurrentDirectory(), string.Empty);
+                }
+                File.Move(fileToMove, locationOfNewFile);
+                return "File moved successfully!";
+            }
+            catch
+            {
+                return "Failed to move " + fileToMove + " to " + locationOfNewFile + "!";
             }
         }
 
@@ -238,6 +320,88 @@ namespace Terminal
                 return output;
             }
             return "Invalid file path!";
+        }
+
+        public string Find(string fileName, char regex)
+        {
+            string output = string.Empty;
+            List<string> directories = GetAllDirectories(GetCurrentDirectory());
+            List<string> files = new List<string>();
+            files.AddRange(Directory.GetFiles(GetCurrentDirectory()));
+            Console.WriteLine("Indexing...");
+            int count = 0;
+            foreach (string directory in directories)
+            {
+                count++;
+                if (directory.Contains(fileName) || (regex == 'R' && directory.ToLower().Contains(fileName.ToLower())))
+                {
+                    output += "\n--------------------------------------------------------------------------------------------------------\n";
+                    output += String.Format("| {0,-100} |", directory);
+                }
+                files.AddRange(Directory.GetFiles(directory));
+            }
+            Console.WriteLine("Searching...");
+            //percent = Convert.ToInt32(files.Count / 100);
+            foreach (string file in files)
+            {
+                string cleanFileName = file.Substring(file.LastIndexOf(Convert.ToChar(@"\")));
+                if (cleanFileName.Contains(fileName) || (regex == 'R' && cleanFileName.ToLower().Contains(fileName.ToLower())))
+                {
+                    if (!output.Contains(file))
+                    {
+                        output += "\n--------------------------------------------------------------------------------------------------------\n";
+                        output += String.Format("| {0,-100} |", file);
+                    }
+                }
+            }
+            if (output == string.Empty)
+            {
+                return "Unable to find any files with or containing the name " + fileName + "!\n";
+            }
+            output += "\n--------------------------------------------------------------------------------------------------------\n";
+            return "\n" + output;
+        }
+
+        public List<string> GetAllDirectories(string initialDirectory)
+        {
+            List<string> directories = new List<string>();
+            directories.AddRange(Directory.GetDirectories(initialDirectory));
+            int cap = 0;
+            int temp = 0;
+            bool finished = false;
+            double postedPercent = -1;
+            while (!finished)
+            {
+                temp = directories.Count;
+                if (cap != 0 && directories.Count != 0)
+                {
+                    double currentPercent = Convert.ToInt32(Convert.ToDouble(cap) / Convert.ToDouble(directories.Count) * 100d);
+                    if (postedPercent != currentPercent)
+                    {
+                        Console.Clear();
+                        Console.WriteLine(currentPercent + "%");
+                        postedPercent = currentPercent;
+                    }
+                }
+                for (int i = cap; i < directories.Count; i++)
+                {
+                    try
+                    {
+                        directories.AddRange(Directory.GetDirectories(directories[i]));
+                    }
+                    catch
+                    {
+                        //No directories
+                    }
+                }
+                if (temp == directories.Count)
+                {
+                    finished = true;
+                }
+                cap = temp;
+            }
+            directories.Sort();
+            return directories;
         }
     }
 }

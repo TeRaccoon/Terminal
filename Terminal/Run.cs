@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Terminal
 {
@@ -13,11 +10,15 @@ namespace Terminal
         public Run()
         {
             InputHandler inputHandler = new InputHandler(fileHandler, consoleHandler);
+            ThreadHandler threadHandler = new ThreadHandler();
             string output = string.Empty;
+            threadHandler.StartKeyOverride();
             while (output != "exit")
             {
                 Console.Write(fileHandler.GetCurrentDirectory() + " > ");
+                
                 List<string> inputData = inputHandler.SplitInput(Console.ReadLine());
+                //threadHandler.EndKeyOverride();
                 List<string> flagArgumentData = inputData;
                 string command = inputData[0];
                 flagArgumentData.RemoveAt(0);

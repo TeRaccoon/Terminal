@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Terminal
+﻿namespace Terminal
 {
     class DataHandler
     {
+        private bool state = true;
         public string RegexString(string[] data, string regex, char regexType)
         {
             if (regex == "noRegex")
@@ -46,6 +41,15 @@ namespace Terminal
                 data[i] += "\n";
             }
             return data;
+        }
+
+        public void SetCorrectFlag(bool state)
+        {
+            this.state = state;
+        }
+        public bool GetCorrectFlag()
+        {
+            return state;
         }
     }
 }
